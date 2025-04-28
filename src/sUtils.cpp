@@ -131,31 +131,35 @@ void Init()
 void Draw()
 {
 
-  write(STDOUT_FILENO, "\033[H\033[2J", 7);
+  write(STDOUT_FILENO, "\033[H\033[2J\033[33m", 12);
   char str[22];
   int len;
 
   for (int i = 0; i < TerminalSize.x; i++)
-    write(STDOUT_FILENO, "-", 1);
+    write(STDOUT_FILENO, "\u2500", 3);
 
   len = snprintf(str, sizeof(str), "\r\033[%dB", TerminalSize.y - 1);
   write(STDOUT_FILENO, str, len);
 
   for (int i = 0; i < TerminalSize.x; i++)
-    write(STDOUT_FILENO, "-", 1);
+    write(STDOUT_FILENO, "\u2500", 3);
 
   write(STDOUT_FILENO, "\033[H", 3);  
  
-  write(STDOUT_FILENO, "|", 1);
-  for (int i = 0; i < TerminalSize.y - 1; i++)
-    write(STDOUT_FILENO, "\n\b|", 4);
+  write(STDOUT_FILENO, "\u250C", 3);
+  for (int i = 0; i < TerminalSize.y - 2; i++)
+    write(STDOUT_FILENO, "\n\b\u2502", 5);
+
+  write(STDOUT_FILENO, "\n\b\u2514", 5);
 
   len = snprintf(str, sizeof(str), "\033[H\033[%dC", TerminalSize.x);
   write(STDOUT_FILENO, str, len);  
 
-  write(STDOUT_FILENO, "|", 1);
-  for (int i = 0; i < TerminalSize.y - 1; i++)
-    write(STDOUT_FILENO, "\n|", 3);
+  write(STDOUT_FILENO, "\u2510", 3);
+  for (int i = 0; i < TerminalSize.y - 2; i++)
+    write(STDOUT_FILENO, "\n\u2502", 4);
+
+  write(STDOUT_FILENO, "\n\u2518", 4);
 
 
   for (int i = 0; i < Fruits.size(); i++)
