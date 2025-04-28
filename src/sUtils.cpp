@@ -132,26 +132,26 @@ void Draw()
   int len;
 
   for (int i = 0; i < TerminalSize.x; i++)
-    write(STDOUT_FILENO, "#", 1);
+    write(STDOUT_FILENO, "-", 1);
 
   len = snprintf(str, sizeof(str), "\r\033[%dB", TerminalSize.y - 1);
   write(STDOUT_FILENO, str, len);
 
   for (int i = 0; i < TerminalSize.x; i++)
-    write(STDOUT_FILENO, "#", 1);
+    write(STDOUT_FILENO, "-", 1);
 
   write(STDOUT_FILENO, "\033[H", 3);  
  
-  write(STDOUT_FILENO, "#", 1);
+  write(STDOUT_FILENO, "|", 1);
   for (int i = 0; i < TerminalSize.y - 1; i++)
-    write(STDOUT_FILENO, "\n\b#", 4);
+    write(STDOUT_FILENO, "\n\b|", 4);
 
   len = snprintf(str, sizeof(str), "\033[H\033[%dC", TerminalSize.x);
   write(STDOUT_FILENO, str, len);  
 
-  write(STDOUT_FILENO, "#", 1);
+  write(STDOUT_FILENO, "|", 1);
   for (int i = 0; i < TerminalSize.y - 1; i++)
-    write(STDOUT_FILENO, "\n#", 3);
+    write(STDOUT_FILENO, "\n|", 3);
 
 
   for (int i = 0; i < Fruits.size(); i++)
