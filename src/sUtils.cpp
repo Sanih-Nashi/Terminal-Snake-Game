@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <codecvt>
 
 #include "sUtils.h"
 #include "rawMode.h"
@@ -171,6 +172,7 @@ void Init()
     write(STDOUT_FILENO, "\u2500", 3);
 
   write(STDOUT_FILENO, "\u2524", 3);
+  sleep(5);
 }
 
 void Draw()
@@ -191,10 +193,21 @@ void Draw()
     write(STDOUT_FILENO, str, len);
   }
 
-  len = snprintf(str, sizeof(str), "\033[%d;%dH ", 2, PreviousScorePrint.x + 1);
+  len = snprintf(str, sizeof(str), "\033[%d;%dH", 2, PreviousScorePrint.x);
   write(STDOUT_FILENO, str, len);
-  std::string String(PreviousScorePrint.y, ' ');
-  write(STDOUT_FILENO, String.c_str(), String.size());
+  std::wstring wideStr(PreviousScorePrint.y + 1, L'\u2500');
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+  std::string utf8Str = converter.to_bytes(wideStr);
+  write(STDOUT_FILENO, utf8Str.data(), utf8Str.size());
+
+
+  len = snprintf(str, sizeof(str), "Score:= %d", Score);
+  // 10 is the number after all the escape sequences
+  PreviousScorePrint = Vector2i{TerminalSize.x/2 - len/2 + 2, len - 10};
+  len = snprintf(str, sizeof(str), "\033[%d;%dH", 2, PreviousScorePrint.x);
+  write(STDOUT_FILENO, str, len);
+  len = snprintf(str, sizeof(str), "\033[32mScore:- %d\033[35m", Score);
+  write(STDOUT_FILENO, str, len);
 
   for (int i = 0; i < Fruits.size(); i++)
   {
