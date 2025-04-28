@@ -13,16 +13,20 @@
 #include "sUtils.h"
 #include "rawMode.h"
 
+char ReadDirectKey()
+{
+  int read_num;
+  char c;
+  while ( (read_num = read(STDIN_FILENO, &c, 1)) != 1) 
+  {
+    if (read_num == -1 && errno != EAGAIN)
+      die("read");
+  }
+  return c;
+}
+
 char ReadKey()
 {
-//   int read_num;
-//   char c;
-//   while ( (read_num = read(STDIN_FILENO, &c, 1)) != 1) 
-//   {
-//     if (read_num == -1 && errno != EAGAIN)
-//       die("read");
-//   }
-//   return c;
   fd_set set;
   struct timeval timeout;
   int rv;
@@ -256,6 +260,70 @@ void Move()
   default:
     break;
   }
+
+  for (int i = 0; i < Fruits.size(); i++)
+  {
+    if (Snake[0] == Fruits[i])
+    {
+      // checks whether the x axises of the last elements same so the new block
+      // and if yes allocates the new block at the end which is equal to the final block
+      // except with a change in the y axis one unit
+      // so the new block would be in a straight line to the other ones
+
+      if (Snake[Snake.size() - 1].x == Snake[Snake.size() - 2].x)
+        Snake.push_back(Vector2i{
+          Snake[Snake.size() - 1].x,
+          Snake[Snake.size() - 2].y + (Snake[Snake.size() - 1].y - Snake[Snake.size() - 2].y)
+        });
+
+      else 
+        Snake.push_back(Vector2i{
+          Snake[Snake.size() - 2].x + (Snake[Snake.size() - 1].x - Snake[Snake.size() - 2].x),
+          Snake[Snake.size() - 1].y
+        });
+      // if not that means the y axis are the same so the exact opposite
+
+
+      // so that after 5 fruits eaten the deviation would be farther from the snake
+      Deviation += 1/5; 
+      Fruits[i] = GetRandomPos();
+      return;
+    }
+  }
+
+  if (Snake[0].x == 0 || Snake[0].y == 0)
+  {
+    write(STDOUT_FILENO, "\033[H\033[2J\e]50;*Monospace-20\a\033[31m", 31);
+    std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
+    write(STDOUT_FILENO, "YOU LOST", 8);
+    std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
+    write(STDOUT_FILENO, "PRESS 'q' TO EXIT\033[0m", 21);
+    while(true)
+    {
+      char c = ReadDirectKey();
+      if (c == 'q')
+        exit(0);
+    }  
+  }
+
+  for (int i = 1; i < Snake.size(); i++)
+  {
+    if (Snake[0] == Snake[i]){
+      write(STDOUT_FILENO, "\033[H\033[2J\033[31m\033]50;72\007", 20);
+      std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
+      write(STDOUT_FILENO, "YOU LOST", 8);
+      std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
+      write(STDOUT_FILENO, "PRESS 'q' TO EXIT\033[0m\033]50;12\007", 29);
+      while(true)
+      {
+       char c = ReadDirectKey();
+        if (c == 'q')
+        exit(0);
+      }  
+    }           
+  }
+  // \e]50;*Monospace-20\a
+
 }
 
 void ProcessKey()
