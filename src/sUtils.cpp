@@ -131,8 +131,8 @@ void Init()
 void Draw()
 {
 
-  write(STDOUT_FILENO, "\033[H\033[2J\033[33m", 12);
-  char str[22];
+  write(STDOUT_FILENO, "\033[H\033[2J\033[35m", 12);
+  char str[32];
   int len;
 
   for (int i = 0; i < TerminalSize.x; i++)
@@ -160,6 +160,18 @@ void Draw()
     write(STDOUT_FILENO, "\n\u2502", 4);
 
   write(STDOUT_FILENO, "\n\u2518", 4);
+
+  write(STDOUT_FILENO, "\033[H\n\u251C", 7);
+  len = snprintf(str, sizeof(str), "\033[32mScore: %d\033[35m", Score);
+
+  for (int i = 1; i < TerminalSize.x/2 - len/2; i++) // subtraction to centre things so that the text looks good
+    write(STDOUT_FILENO, "\u2500", 3);
+
+  write(STDOUT_FILENO, str, len);
+  for (int i = TerminalSize.x/2 + len/2; i < TerminalSize.x - 1; i++)
+    write(STDOUT_FILENO, "\u2500", 3);
+
+  write(STDOUT_FILENO, "\u2524", 3);
 
 
   for (int i = 0; i < Fruits.size(); i++)
@@ -192,8 +204,7 @@ void Move()
     if (PreviousDirection == Dir::DOWN)
     {
       Direction = PreviousDirection;
-      Move();
-      break;
+      return;
     }
       PreviousDirection = Dir::UP;
     for (int i = Snake.size() - 1; i > 0; i--)
@@ -201,6 +212,7 @@ void Move()
       Snake[i] = Snake[i - 1];
     }
     Snake[0].y--;
+    Draw();
     break;
   }
 
@@ -210,8 +222,7 @@ void Move()
     if (PreviousDirection == Dir::UP)
     {
       Direction = PreviousDirection;
-      Move();
-      break;
+      return;
     }
       PreviousDirection = Dir::DOWN;
     for (int i = Snake.size() - 1; i > 0; i--)
@@ -219,6 +230,7 @@ void Move()
       Snake[i] = Snake[i - 1];
     }
     Snake[0].y++;
+    Draw();
     break;
   }
   
@@ -229,8 +241,7 @@ void Move()
     if (PreviousDirection == Dir::RIGHT)
     {
       Direction = PreviousDirection;
-      Move();
-      break;
+      return;
     }
       PreviousDirection = Dir::LEFT;
     for (int i = Snake.size() - 1; i > 0; i--)
@@ -238,6 +249,7 @@ void Move()
       Snake[i] = Snake[i - 1];
     }
     Snake[0].x--;
+    Draw();
     break;
   }
   
@@ -248,8 +260,7 @@ void Move()
     if (PreviousDirection == Dir::LEFT)
     {
       Direction = PreviousDirection;
-      Move();
-      break;
+      return;
     }
       PreviousDirection = Dir::RIGHT;
     for (int i = Snake.size() - 1; i > 0; i--)
@@ -257,6 +268,7 @@ void Move()
       Snake[i] = Snake[i - 1];
     }
     Snake[0].x++;
+    Draw();
     break;
   }
   
@@ -290,12 +302,13 @@ void Move()
 
       // so that after 5 fruits eaten the deviation would be farther from the snake
       Deviation += 1/5; 
+      Score += 5;
       Fruits[i] = GetRandomPos();
       return;
     }
   }
 
-  if (Snake[0].x == 0 || Snake[0].y == 0)
+  if (Snake[0].x <= 1 || Snake[0].y <= 1 || Snake[0].x >= TerminalSize.x - 1 || Snake[0].y >= TerminalSize.y - 1)
   {
     write(STDOUT_FILENO, "\033[H\033[2J\e]50;*Monospace-20\a\033[31m", 31);
     std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;

@@ -25,6 +25,7 @@ inline Dir PreviousDirection;
 inline struct termios orig_setting;
 inline Vector2i TerminalSize;
 inline int Deviation = 3;
+inline int Score = 0;
 inline std::vector<Vector2i> Snake;
 inline std::vector<Vector2i> Fruits;
 
