@@ -9,6 +9,7 @@
 #include <random>
 #include <cmath>
 #include <iostream>
+#include <string>
 
 #include "sUtils.h"
 #include "rawMode.h"
@@ -126,10 +127,6 @@ void Init()
     GetRandomPos()
   };
 
-}
-
-void Draw()
-{
 
   write(STDOUT_FILENO, "\033[H\033[2J\033[35m", 12);
   char str[32];
@@ -162,27 +159,52 @@ void Draw()
   write(STDOUT_FILENO, "\n\u2518", 4);
 
   write(STDOUT_FILENO, "\033[H\n\u251C", 7);
-  len = snprintf(str, sizeof(str), "\033[32mScore: %d\033[35m", Score);
+  len = snprintf(str, sizeof(str), "\033[32mScore:- %d\033[35m", Score);
+  // 10 is the number after all the escape sequences
+  PreviousScorePrint = Vector2i{TerminalSize.x/2 - (len - 10)/2 + 2, len - 10}; // just scores where the printing starts and how much length
 
-  for (int i = 1; i < TerminalSize.x/2 - len/2; i++) // subtraction to centre things so that the text looks good
+  for (int i = 1; i < PreviousScorePrint.x; i++) // subtraction to centre things so that the text looks good
     write(STDOUT_FILENO, "\u2500", 3);
 
   write(STDOUT_FILENO, str, len);
-  for (int i = TerminalSize.x/2 + len/2; i < TerminalSize.x - 1; i++)
+  for (int i = TerminalSize.x/2 + len/2; i < TerminalSize.x - 1 + 2; i++)
     write(STDOUT_FILENO, "\u2500", 3);
 
   write(STDOUT_FILENO, "\u2524", 3);
+}
 
+void Draw()
+{
+
+  char str[64];
+  int len;
+
+  for (Vector2i& val: PreviousSnake)
+  {
+    len = snprintf(str, sizeof(str), "\033[%d;%dH ", val.y + 1, val.x + 1);
+    write(STDOUT_FILENO, str, len);
+  }
+
+  for (Vector2i& val: PreviousFruits)
+  {
+    len = snprintf(str, sizeof(str), "\033[%d;%dH ", val.y + 1, val.x + 1);
+    write(STDOUT_FILENO, str, len);
+  }
+
+  len = snprintf(str, sizeof(str), "\033[%d;%dH ", 2, PreviousScorePrint.x + 1);
+  write(STDOUT_FILENO, str, len);
+  std::string String(PreviousScorePrint.y, ' ');
+  write(STDOUT_FILENO, String.c_str(), String.size());
 
   for (int i = 0; i < Fruits.size(); i++)
   {
-    len = snprintf(str, sizeof(str), "\033[%d;%dH", Fruits[i].y + 1, Fruits[i].x + 1);
+    len = snprintf(str, sizeof(str), "\033[%d;%dH", Fruits[i].y + 1, Fruits[i].x + 1); // plus one because the index starts at one
     write(STDOUT_FILENO, str, len);
     write(STDOUT_FILENO, "\033[31m@\033[0m", 10);
   }
-  
+  PreviousFruits = Fruits;
 
-  len = snprintf(str, sizeof(str), "\033[%d;%dH", Snake[0].y + 1, Snake[0].x + 1);
+  len = snprintf(str, sizeof(str), "\033[%d;%dH", Snake[0].y + 1, Snake[0].x + 1); // same reason as for Fruits
   write(STDOUT_FILENO, str, len);
   write(STDOUT_FILENO, "\033[32mO\033[0m", 10);
   for (int i = 1; i < Snake.size(); i++)
@@ -191,6 +213,7 @@ void Draw()
     write(STDOUT_FILENO, str, len);
     write(STDOUT_FILENO, "\033[32m#\033[0m", 10);
   }
+  PreviousSnake = Snake;
 
 
 }
