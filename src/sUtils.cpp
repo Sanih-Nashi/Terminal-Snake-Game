@@ -163,7 +163,6 @@ void Init()
   len = snprintf(str, sizeof(str), "\033[32mScore:- %d\033[35m", Score);
   // 10 is the number after all the escape sequences
   PreviousScorePrint = Vector2i{TerminalSize.x/2 - (len - 10)/2 + 2, len - 10}; // just scores where the printing starts and how much length
-
   for (int i = 1; i < PreviousScorePrint.x; i++) // subtraction to centre things so that the text looks good
     write(STDOUT_FILENO, "\u2500", 3);
 
@@ -172,7 +171,15 @@ void Init()
     write(STDOUT_FILENO, "\u2500", 3);
 
   write(STDOUT_FILENO, "\u2524", 3);
-  sleep(5);
+
+
+  for (int i = 0; i < Fruits.size(); i++)
+  {
+    len = snprintf(str, sizeof(str), "\033[%d;%dH", Fruits[i].y + 1, Fruits[i].x + 1); 
+    write(STDOUT_FILENO, str, len);
+    write(STDOUT_FILENO, "\033[31m@\033[0m", 10);
+  }
+
 }
 
 void Draw()
@@ -187,37 +194,37 @@ void Draw()
     write(STDOUT_FILENO, str, len);
   }
 
-  for (Vector2i& val: PreviousFruits)
-  {
-    len = snprintf(str, sizeof(str), "\033[%d;%dH ", val.y + 1, val.x + 1);
-    write(STDOUT_FILENO, str, len);
-  }
-
-  len = snprintf(str, sizeof(str), "\033[%d;%dH", 2, PreviousScorePrint.x);
+  // for (Vector2i& val: PreviousFruits)
+  // {
+  //   len = snprintf(str, sizeof(str), "\033[%d;%dH ", val.y + 1, val.x + 1);
+  //   write(STDOUT_FILENO, str, len);
+  // }
+  len = snprintf(str, sizeof(str), "\033[%d;%dH\033[35m", 2, PreviousScorePrint.x + 1);
   write(STDOUT_FILENO, str, len);
-  std::wstring wideStr(PreviousScorePrint.y + 1, L'\u2500');
+  std::wstring wideStr(PreviousScorePrint.y, L'\u2500');
   std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
   std::string utf8Str = converter.to_bytes(wideStr);
   write(STDOUT_FILENO, utf8Str.data(), utf8Str.size());
+  write(STDOUT_FILENO, "\033[0m", 4);
 
 
   len = snprintf(str, sizeof(str), "Score:= %d", Score);
   // 10 is the number after all the escape sequences
-  PreviousScorePrint = Vector2i{TerminalSize.x/2 - len/2 + 2, len - 10};
+  PreviousScorePrint = Vector2i{TerminalSize.x/2 - len/2 + 2, len};
   len = snprintf(str, sizeof(str), "\033[%d;%dH", 2, PreviousScorePrint.x);
   write(STDOUT_FILENO, str, len);
   len = snprintf(str, sizeof(str), "\033[32mScore:- %d\033[35m", Score);
   write(STDOUT_FILENO, str, len);
 
-  for (int i = 0; i < Fruits.size(); i++)
-  {
-    len = snprintf(str, sizeof(str), "\033[%d;%dH", Fruits[i].y + 1, Fruits[i].x + 1); // plus one because the index starts at one
-    write(STDOUT_FILENO, str, len);
-    write(STDOUT_FILENO, "\033[31m@\033[0m", 10);
-  }
-  PreviousFruits = Fruits;
+  // for (int i = 0; i < Fruits.size(); i++)
+  // {
+  //   len = snprintf(str, sizeof(str), "\033[%d;%dH", Fruits[i].y + 1, Fruits[i].x + 1); 
+  //   write(STDOUT_FILENO, str, len);
+  //   write(STDOUT_FILENO, "\033[31m@\033[0m", 10);
+  // }
+  // PreviousFruits = Fruits;
 
-  len = snprintf(str, sizeof(str), "\033[%d;%dH", Snake[0].y + 1, Snake[0].x + 1); // same reason as for Fruits
+  len = snprintf(str, sizeof(str), "\033[%d;%dH", Snake[0].y + 1, Snake[0].x + 1); // plus one because the index starts at one
   write(STDOUT_FILENO, str, len);
   write(STDOUT_FILENO, "\033[32mO\033[0m", 10);
   for (int i = 1; i < Snake.size(); i++)
@@ -337,9 +344,13 @@ void Move()
 
 
       // so that after 5 fruits eaten the deviation would be farther from the snake
-      Deviation += 1/5; 
+      Deviation += 1/4; 
       Score += 5;
       Fruits[i] = GetRandomPos();
+      char str[32];
+      int len = snprintf(str, sizeof(str), "\033[%d;%dH", Fruits[i].y + 1, Fruits[i].x + 1);
+      write(STDOUT_FILENO, str, len);
+      write(STDOUT_FILENO, "\033[31m@\033[0m", 10);
       return;
     }
   }
@@ -362,13 +373,14 @@ void Move()
   for (int i = 1; i < Snake.size(); i++)
   {
     if (Snake[0] == Snake[i]){
-      write(STDOUT_FILENO, "\033[H\033[2J\033[31m\033]50;72\007", 20);
+      write(STDOUT_FILENO, "\033[H\033[2J\033[31m", 12);
       std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
       write(STDOUT_FILENO, "YOU LOST", 8);
       std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
-      write(STDOUT_FILENO, "PRESS 'q' TO EXIT\033[0m\033]50;12\007", 29);
+      write(STDOUT_FILENO, "PRESS 'q' TO EXIT\033[0m", 21);
       while(true)
       {
+        main();
        char c = ReadDirectKey();
         if (c == 'q')
         exit(0);
