@@ -90,10 +90,10 @@ Restart:
   while (true){
 
     value = distribx(gen);
-    pos.x = std::clamp(static_cast<int>(std::round(value)), 1, TerminalSize.x - 1);
+    pos.x = std::clamp(static_cast<int>(std::round(value)), 1, TerminalSize.x - 2);
 
     value = distriby(gen);
-    pos.y = std::clamp(static_cast<int>(std::round(value)), 1, TerminalSize.y - 1);
+    pos.y = std::clamp(static_cast<int>(std::round(value)), 1, TerminalSize.y - 2);
 
     // checks if the number is inside the vector Snake
     for (const Vector2i& val : Snake){
