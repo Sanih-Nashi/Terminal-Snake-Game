@@ -251,10 +251,37 @@ void LoseScreen()
   write(STDOUT_FILENO, "\033[H\033[2J\033[34m", 12);
   std::cout <<"\033[" <<TerminalSize.y/2 - 1 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
   write(STDOUT_FILENO, "YOU LOST", 8);
-  std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 10 <<"H" <<std::flush;
+
+  char str[22];
+  int len = snprintf(str, sizeof(str), "Score :- \033[31m%d\033[34m", Score);
+  std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - (len - 10)/2 <<"H" <<std::flush;
+  write(STDOUT_FILENO, str, len);
+
+  std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 10 <<"H" <<std::flush;
   write(STDOUT_FILENO, "PRESS '\033[31mr\033[34m' TO RESTART", 30);
-  std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
+
+  std::cout <<"\033[" <<TerminalSize.y/2 + 2 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
   write(STDOUT_FILENO, "PRESS '\033[31mq\033[34m' TO EXIT\033[0m", 31);
+
+  std::cout <<"\033[" <<TerminalSize.y/2 - 3 <<";" <<TerminalSize.x/2 - 13 <<"H" <<std::flush;
+  for (int i = 0; i < 25; i++)
+    write(STDOUT_FILENO, "\u2500", 3);
+  write(STDOUT_FILENO, "\u2510\n\b", 5);
+
+  for (int i = 0; i < 6; i++)
+    write(STDOUT_FILENO, "\u2502\n\b", 5);
+  write(STDOUT_FILENO, "\u2518\b\b", 5);
+
+  for (int i = 0; i < 24; i++)
+    write(STDOUT_FILENO, "\u2500\b\b", 5);
+  write(STDOUT_FILENO, "\u2514", 3);
+
+  std::cout <<"\033[" <<TerminalSize.y/2 - 3 <<";" <<TerminalSize.x/2 - 13 <<"H" <<std::flush;
+  write(STDOUT_FILENO, "\u250C\b\n", 5);
+  for (int i = 0; i < 6; i++)
+    write(STDOUT_FILENO, "\u2502\n\b", 5);
+
+
   while(true)
   {
     char c = ReadDirectKey();
