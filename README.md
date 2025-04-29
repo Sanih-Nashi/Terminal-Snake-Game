@@ -1,5 +1,5 @@
-# Snake
-It is a simple snake game in the terminal made for linux.
+# ABOUT
+It is a simple `SNAKE GAME` in the terminal made for linux.
 
 # Controls
 ### W Key:- UP
