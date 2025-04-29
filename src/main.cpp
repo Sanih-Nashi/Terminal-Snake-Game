@@ -6,11 +6,14 @@
 int main()
 {
   RawMode::enableRawMode();
-  Init();
   while (true)
   {
-    Draw();
-    ProcessKey();
+    Init();
+    while (!Restart)
+    {
+      Draw();
+      ProcessKey();
+    }
   }
   return 0;
 }

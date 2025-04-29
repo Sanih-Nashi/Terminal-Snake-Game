@@ -109,12 +109,20 @@ Restart:
 
 void Init()
 {
+  atexit(RawMode::disableRawMode);
+
   if (!GetTerminalWin(TerminalSize.x, TerminalSize.y))
     die("cannot get the terminal size");
 
   Direction = Dir::UP;
   PreviousDirection = Dir::NIL;
-  
+  Restart = false;
+  Score = 0;
+  Deviation = 3;
+  PreviousSnake = std::vector<Vector2i>{};
+  PreviousFruits = std::vector<Vector2i>{};
+  PreviousScorePrint = Vector2i{0, 0};
+
   Snake = std::vector{
     Vector2i{TerminalSize.x / 2, (TerminalSize.y / 2)},
     Vector2i{TerminalSize.x / 2, (TerminalSize.y / 2) + 1},
@@ -238,6 +246,28 @@ void Draw()
 
 }
 
+void LoseScreen()
+{
+  write(STDOUT_FILENO, "\033[H\033[2J\033[34m", 12);
+  std::cout <<"\033[" <<TerminalSize.y/2 - 1 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
+  write(STDOUT_FILENO, "YOU LOST", 8);
+  std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 10 <<"H" <<std::flush;
+  write(STDOUT_FILENO, "PRESS '\033[31mr\033[34m' TO RESTART", 30);
+  std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
+  write(STDOUT_FILENO, "PRESS '\033[31mq\033[34m' TO EXIT\033[0m", 31);
+  while(true)
+  {
+    char c = ReadDirectKey();
+    if (c == 'q')
+      exit(0);
+    else if (c == 'r')
+    {
+      Restart = true;
+      break;
+    }
+  }
+}
+
 void Move()
 {
   switch (Direction)
@@ -357,34 +387,14 @@ void Move()
 
   if (Snake[0].x <= 1 || Snake[0].y <= 1 || Snake[0].x >= TerminalSize.x - 1 || Snake[0].y >= TerminalSize.y - 1)
   {
-    write(STDOUT_FILENO, "\033[H\033[2J\e]50;*Monospace-20\a\033[31m", 31);
-    std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
-    write(STDOUT_FILENO, "YOU LOST", 8);
-    std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
-    write(STDOUT_FILENO, "PRESS 'q' TO EXIT\033[0m", 21);
-    while(true)
-    {
-      char c = ReadDirectKey();
-      if (c == 'q')
-        exit(0);
-    }  
+    LoseScreen();
   }
 
   for (int i = 1; i < Snake.size(); i++)
   {
-    if (Snake[0] == Snake[i]){
-      write(STDOUT_FILENO, "\033[H\033[2J\033[31m", 12);
-      std::cout <<"\033[" <<TerminalSize.y/2 <<";" <<TerminalSize.x/2 - 4 <<"H" <<std::flush;
-      write(STDOUT_FILENO, "YOU LOST", 8);
-      std::cout <<"\033[" <<TerminalSize.y/2 + 1 <<";" <<TerminalSize.x/2 - 8 <<"H" <<std::flush;
-      write(STDOUT_FILENO, "PRESS 'q' TO EXIT\033[0m", 21);
-      while(true)
-      {
-        main();
-       char c = ReadDirectKey();
-        if (c == 'q')
-        exit(0);
-      }  
+    if (Snake[0] == Snake[i])
+    {
+      LoseScreen();
     }           
   }
   // \e]50;*Monospace-20\a
